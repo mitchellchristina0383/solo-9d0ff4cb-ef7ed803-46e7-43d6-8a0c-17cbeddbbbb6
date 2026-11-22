@@ -112,6 +112,9 @@ def main() -> int:
     print("\n== 场景 3: 等待首包时改选, 已取消的选台不因迟到首包生效 ==")
     select("stb-c", 1)
     wait_until(lambda: status("stb-c")["current_channel"] == 1)
+    # 给旧台(1)留出至少一个包, 这样切换后必然能读到"旧台 + 新台"两类包;
+    # 否则旧台包在选台前那几毫秒是否恰好到达不确定 (原实现偶发失败).
+    time.sleep(1.2)
     drain("stb-c")
     joins_before = source_state()["2"]["joins"]
     select("stb-c", 2)  # 频道 2 已在播 (stb-d), 无需新订阅
