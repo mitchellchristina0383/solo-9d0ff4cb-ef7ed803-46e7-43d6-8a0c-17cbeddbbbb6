@@ -1,0 +1,22 @@
+services:
+  source:
+    build: ./source
+    container_name: tv-source
+    environment:
+      PROXY_HOST: proxy          # 节目包 UDP 发送目标(代理)
+      PROXY_UDP_PORT: "5000"
+      PACKET_INTERVAL: "0.5"     # 每频道发包间隔(秒)
+    ports:
+      - "9000:9000"              # 源控制面: http://localhost:9000/docs
+
+  proxy:
+    build: ./proxy
+    container_name: tv-proxy
+    environment:
+      SOURCE_URL: http://source:9000
+      UDP_LISTEN_PORT: "5000"
+    ports:
+      - "8000:8000"              # 机顶盒 API: http://localhost:8000/docs
+      - "5000:5000/udp"          # 接收源转发的节目包
+    depends_on:
+      - source
